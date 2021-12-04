@@ -1,5 +1,4 @@
 import sys
-from pprint import pprint
 
 def get_board_score(board):
   return sum([sum([entry for entry in row if entry != 'x']) for row in board])
