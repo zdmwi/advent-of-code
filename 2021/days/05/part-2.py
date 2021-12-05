@@ -1,4 +1,5 @@
 import sys
+from collections import Counter
 
 def x1(line):
   return line[0][0]
@@ -26,35 +27,33 @@ def is_diagonal(line):
   return not is_horizontal(line) and not is_vertical(line)
 
 def count_overlapping_points(lines):
-  max_x = max(max(line[0][0], line[1][0]) for line in lines)
-  max_y = max(max(line[0][1], line[1][1]) for line in lines)
-
-  board = [[0 for _ in range(max_x + 1)] for _ in range(max_y + 1)]
+  hits = Counter()
 
   counted = set()
   for line in lines:
     if is_diagonal(line):
-      x_step = 1
-      y_step = 1
+      x_delta = 1
+      y_delta = 1
       if x1(line) > x2(line):
-        x_step = -1
+        x_delta = -1
 
       if y1(line) > y2(line):
-        y_step = -1
+        y_delta = -1
 
       x = x1(line)
       y = y1(line)
-      board[y][x] += 1
       key = f'{x},{y}'
-      if key not in counted and board[y][x] >= 2:
+      hits[key] += 1
+      if key not in counted and hits[key] >= 2:
         counted.add(key)
       while x != x2(line) and y != y2(line):
-        x += x_step
-        y += y_step
-        board[y][x] += 1
-        
+        x += x_delta
+        y += y_delta
+
         key = f'{x},{y}'
-        if key not in counted and board[y][x] >= 2:
+        hits[key] += 1
+        
+        if key not in counted and hits[key] >= 2:
           counted.add(key)
       
     else:
@@ -64,9 +63,9 @@ def count_overlapping_points(lines):
       upper_x = max(x1(line), x2(line))
       for y in range(lower_y, upper_y + 1):
         for x in range(lower_x, upper_x + 1):
-          board[y][x] += 1
           key = f'{x},{y}'
-          if key not in counted and board[y][x] >= 2:
+          hits[key] += 1
+          if key not in counted and hits[key] >= 2:
             counted.add(key)
 
   return len(counted)

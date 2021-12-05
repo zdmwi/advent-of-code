@@ -1,5 +1,5 @@
 import sys
-from pprint import pprint
+from collections import Counter
 
 def x1(line):
   return line[0][0]
@@ -27,10 +27,7 @@ def is_diagonal(line):
   return not is_horizontal(line) and not is_vertical(line)
 
 def count_overlapping_points(lines):
-  max_x = max(max(line[0][0], line[1][0]) for line in lines)
-  max_y = max(max(line[0][1], line[1][1]) for line in lines)
-
-  board = [[0 for _ in range(max_x + 1)] for _ in range(max_y + 1)]
+  hits = Counter()
 
   counted = set()
   for line in lines:
@@ -39,9 +36,9 @@ def count_overlapping_points(lines):
 
     for y in range(min(y1(line), y2(line)), max(y1(line), y2(line))+1):
       for x in range(min(x1(line), x2(line)), max(x1(line), x2(line))+1):
-        board[y][x] += 1
         key = f'{x},{y}'
-        if key not in counted and board[y][x] >= 2:
+        hits[key] += 1
+        if key not in counted and hits[key] >= 2:
           counted.add(key)
 
   return len(counted)
