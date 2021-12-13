@@ -1,50 +1,33 @@
 import sys
-from collections import defaultdict
+from collections import defaultdict, deque
 from pprint import pprint
 
 
 def find_viable_paths(connections):
   graph = defaultdict(list)
 
-  small_caves = set()
   for connection in connections:
     a, b = connection.split('-')
-
-    if a == 'start' or b == 'end':
-      graph[a].append(b)
-    elif b == 'start' or a == 'end':
-      graph[b].append(a)
-    else:
-      if a.islower():
-        small_caves.add(a)
-
-      if b.islower():
-        small_caves.add(b)
-
-      graph[a].append(b)
-      graph[b].append(a)
+    graph[a].append(b)
+    graph[b].append(a)
   
-  paths = []
-  stack = [(set(), ['start'], start) for start in graph['start']]
+  paths = 0
+  stack = deque([(set(['start']), 'start')])
   while len(stack) > 0:
-    seen, path, current = stack.pop()
-
-    if current in small_caves and current in seen:
-      continue
+    small_caves, current = stack.pop()
 
     if current == 'end':
-      path.append(current)
-      paths.append(path.copy())
+      paths += 1
       continue
 
-    seen.add(current)
-    path.append(current)
+    if current.islower():
+      small_caves.add(current)
     for nbr in graph[current]:
-      if nbr in small_caves and nbr in seen:
+      if nbr in small_caves:
         continue
-      stack.append((seen.copy(), path.copy(), nbr))
+      stack.append((set(small_caves), nbr))
  
-  return len(paths)
+  return paths
 
 if __name__ == '__main__':
   connections = [line.strip() for line in sys.stdin.readlines()]

@@ -1,52 +1,39 @@
 import sys
-from collections import defaultdict
+from collections import defaultdict, deque
 from pprint import pprint
 
 
 def find_viable_paths(connections):
   graph = defaultdict(list)
 
-  small_caves = set()
   for connection in connections:
     a, b = connection.split('-')
-
-    if a == 'start' or b == 'end':
-      graph[a].append(b)
-    elif b == 'start' or a == 'end':
-      graph[b].append(a)
-    else:
-      if a.islower():
-        small_caves.add(a)
-
-      if b.islower():
-        small_caves.add(b)
-
-      graph[a].append(b)
-      graph[b].append(a)
+    graph[a].append(b)
+    graph[b].append(a)
   
-  paths = []
-  stack = [(False, defaultdict(int), ['start'], start) for start in graph['start']]
+  paths = 0
+  stack = deque([(False, defaultdict(int), 'start')])
   while len(stack) > 0:
-    small_cave_visited_twice, seen, path, current = stack.pop()
+    visited_twice, small_caves, current = stack.pop()
 
-    if current in small_caves \
-        and current in seen \
-        and small_cave_visited_twice:
+    if current in small_caves and visited_twice:
       continue
 
     if current == 'end':
-      path.append(current)
-      paths.append(path.copy())
+      paths += 1
       continue
 
-    seen[current] += 1
-    if current in small_caves and seen[current] > 1:
-      small_cave_visited_twice = True
-    path.append(current)
+    if current.islower() or current in small_caves:
+      small_caves[current] += 1
+      if small_caves[current] > 1:
+        visited_twice = True
+    
     for nbr in graph[current]:
-      stack.append((small_cave_visited_twice, seen.copy(), path.copy(), nbr))
+      if nbr == 'start':
+        continue
+      stack.append((visited_twice, small_caves.copy(), nbr))
  
-  return len(paths)
+  return paths
 
 if __name__ == '__main__':
   connections = [line.strip() for line in sys.stdin.readlines()]
