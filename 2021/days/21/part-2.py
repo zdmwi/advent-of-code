@@ -1,6 +1,5 @@
 from functools import lru_cache
 import sys
-from turtle import position
 
 
 def get_quantum_rolls():
